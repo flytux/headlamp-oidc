@@ -198,22 +198,3 @@ Headlamp 접근
 RBAC 기반 권한 제어
 
 모두 정상 동작
-
-💡 현실적인 개선 (강력 추천)
-지금 구성은 테스트용입니다. 운영에서는 반드시:
-
-HTTPS (Ingress + cert-manager)
-
-Keycloak 외부 DNS
-
-kube-oidc-proxy TLS
-
-ServiceAccount 분리
-
-원하면 다음 단계도 바로 만들어드릴게요:
-
-ingress + cert-manager 포함 “실운영 YAML”
-
-docker-compose Keycloak 대신 helm production 설정
-
-GitOps (ArgoCD)로 자동 배포 구조
