@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+      - name: keycloak
+        image: quay.io/keycloak/keycloak:26.6.1
+        args:
+        - start-dev
+        - --http-enabled=true
+        - --hostname=https://keycloak.node-01
+        - --proxy-headers=xforwarded
+        env:
+        - name: KC_BOOTSTRAP_ADMIN_USERNAME
+          value: admin
+        - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+          value: admin123
+        - name: KC_HEALTH_ENABLED
+          value: "true"
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 9000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 9000
+          initialDelaySeconds: 60
+          periodSeconds: 15
+        resources:
+          requests:
+            cpu: 250m
+            memory: 768Mi
+          limits:
+            memory: 1536Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: keycloak
+spec:
+  selector:
+    app: keycloak
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak
+  namespace: keycloak
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - keycloak.node-01
+    secretName: keycloak-tls
+  rules:
+  - host: keycloak.node-01
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: keycloak
+            port:
+              number: 80
