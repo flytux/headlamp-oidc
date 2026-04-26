@@ -18,6 +18,11 @@ Browser → nginx Ingress → Headlamp (Keycloak OIDC 로그인)
                            - headlamp-devs   → view
 ```
 
+## 0. K3S 클러스터
+```bash
+curl -sfL https://get.k3s.io | sh -
+```
+
 ## 1. 변수
 
 ```bash
@@ -42,7 +47,6 @@ export REDIRECT_URI="http://${HEADLAMP_HOST}/oauth2/callback"
 ## 2. Helm repo
 ```bash
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add oauth2-proxy https://oauth2-proxy.github.io/manifests
 helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/
 helm repo update
 ```
