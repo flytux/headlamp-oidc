@@ -54,27 +54,7 @@ helm repo update
 ## 3. Keycloak 설치
 
 ```bash
-kubectl create namespace ${KEYCLOAK_NS} --dry-run=client -o yaml | kubectl apply -f -
-cat > keycloak-values.yaml <<EOF
-auth:
-  adminUser: ${KC_ADMIN_USER}
-  adminPassword: ${KC_ADMIN_PASSWORD}
-ingress:
-  enabled: true
-  ingressClassName: nginx
-  hostname: ${KEYCLOAK_HOST}
-  tls: false
-postgresql:
-  enabled: true
-production: true
-proxy: edge
-EOF
-
-helm upgrade --install keycloak bitnami/keycloak \
-  -n ${KEYCLOAK_NS} \
-  -f keycloak-values.yaml
-
-kubectl -n ${KEYCLOAK_NS} rollout status deploy/keycloak --timeout=5m
+kubectl apply -f manifests/keycloak.yaml
 ```
 
 ## 4. Keycloak 초기 설정
