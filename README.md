@@ -1,8 +1,8 @@
-# Keycloak + oauth2-proxy + Headlamp
+# Keycloak + OIDC Proxy (oauth2-proxy / kube-oidc-proxy) + Headlamp
 
 > **구성 방식**
-> - **[1]** (1~10) : oauth2-proxy로 UI 접근 보호 + 공용 SA 토큰으로 자동 로그인 (간단, 단일 권한)
-> - **[2]** (11~)  : kube-oidc-proxy 추가로 그룹별 RBAC 자동 적용 (kube-apiserver 설정 변경 불필요)
+> - **[인증 + 단일 권한]** (1~10) : oauth2-proxy로 UI 접근 보호 + 공용 SA 토큰으로 자동 로그인 (간단, 단일 권한)
+> - **[그룹별 RBAC 적용]** (11~)  : headlamp oidc 이용 - kube-oidc-proxy 로 그룹별 RBAC 자동 적용 (kube-apiserver 설정 변경 불필요)
 
 ## 1. 변수
 
@@ -16,10 +16,10 @@ export KC_ADMIN_USER="admin"
 export KC_ADMIN_PASSWORD="admin123"
 
 export REALM="headlamp"
-export GROUP_NAME="headlamp-admins"
-export DEV_GROUP_NAME="headlamp-devs"
-export USERNAME="headlamp-user"
-export USER_PASSWORD="ChangeMe-User-Password!"
+export GROUP_NAME="hl-admin"
+export DEV_GROUP_NAME="hl-dev"
+export USERNAME="hl-user"
+export USER_PASSWORD="hl-password"
 
 export CLIENT_ID="oauth2-proxy"
 export REDIRECT_URI="http://${HEADLAMP_HOST}/oauth2/callback"
@@ -359,18 +359,6 @@ Browser → nginx Ingress → Headlamp (Keycloak OIDC 로그인)
 git clone https://github.com/TremoloSecurity/kube-oidc-proxy.git
 cd kube-oidc-proxy
 git checkout v1.0.10
-
-# Go 1.21+ 필요
-mkdir -p bin/amd64
-GOOS=linux GOARCH=amd64 go build -o bin/amd64/kube-oidc-proxy ./cmd/
-
-# 이미지 빌드
-docker build -t <your-registry>/kube-oidc-proxy:v1.0.10 .
-
-# CVE 스캔 (trivy 설치된 경우)
-trivy image <your-registry>/kube-oidc-proxy:v1.0.10
-
-docker push <your-registry>/kube-oidc-proxy:v1.0.10
 ```
 
 빌드 없이 ghcr.io 이미지를 그대로 사용할 경우 이 단계는 스킵합니다.
