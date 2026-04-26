@@ -4,12 +4,12 @@ set -euo pipefail
 
 : "${KEYCLOAK_NS:=keycloak}"
 : "${REALM:=headlamp}"
-: "${ADMIN_GROUP:=headlamp-admins}"
-: "${DEV_GROUP:=headlamp-devs}"
-: "${ADMIN_USER:=headlamp-admin}"
-: "${ADMIN_PASSWORD:=ChangeMe-Admin-Password!}"
-: "${DEV_USER:=headlamp-dev}"
-: "${DEV_PASSWORD:=ChangeMe-Dev-Password!}"
+: "${ADMIN_GROUP:=hl-admins}"
+: "${DEV_GROUP:=hl-devs}"
+: "${ADMIN_USER:=admin}"
+: "${ADMIN_PASSWORD:=password}"
+: "${DEV_USER:=dev}"
+: "${DEV_PASSWORD:=password}"
 : "${CLIENT_ID:=headlamp}"
 : "${HEADLAMP_URL:=http://headlamp.node-01}"
 
