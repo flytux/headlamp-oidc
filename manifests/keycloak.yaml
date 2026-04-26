@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: keycloak
-  namespace: keycloak
 spec:
   replicas: 1
   selector:
@@ -54,7 +53,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: keycloak
-  namespace: keycloak
 spec:
   selector:
     app: keycloak
@@ -67,7 +65,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: keycloak
-  namespace: keycloak
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:

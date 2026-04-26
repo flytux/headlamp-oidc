@@ -1,0 +1,168 @@
+### Prepare 3 Secrets
+### headlamp-proxy-kubeconfig : kubeconfig - kube-odic-proxy - with kube-odic-proxy-ca cert
+### oidc-ca : keycloak cert for oidc-ca
+### oidc : base64 endcoded oidc config values
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: headlamp
+    app.kubernetes.io/name: headlamp
+  name: headlamp
+  namespace: headlamp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: headlamp
+      app.kubernetes.io/name: headlamp
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: headlamp
+        app.kubernetes.io/name: headlamp
+    spec:
+      automountServiceAccountToken: true
+      containers:
+      - args:
+        - -oidc-use-cookie
+        - -plugins-dir=/headlamp/plugins
+        - -session-ttl=86400
+        - -oidc-client-id=$(OIDC_CLIENT_ID)
+        - -oidc-client-secret=$(OIDC_CLIENT_SECRET)
+        - -oidc-idp-issuer-url=$(OIDC_ISSUER_URL)
+        - -oidc-scopes=$(OIDC_SCOPES)
+        - -oidc-callback-url=$(OIDC_CALLBACK_URL)
+        - -oidc-validator-client-id=$(OIDC_VALIDATOR_CLIENT_ID)
+        - -oidc-validator-idp-issuer-url=$(OIDC_VALIDATOR_ISSUER_URL)
+        - -kubeconfig=/etc/headlamp/kubeconfig/config
+        env:
+        - name: OIDC_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              key: clientID
+              name: oidc
+        - name: OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: clientSecret
+              name: oidc
+        - name: OIDC_ISSUER_URL
+          valueFrom:
+            secretKeyRef:
+              key: issuerURL
+              name: oidc
+        - name: OIDC_SCOPES
+          valueFrom:
+            secretKeyRef:
+              key: scopes
+              name: oidc
+        - name: OIDC_CALLBACK_URL
+          valueFrom:
+            secretKeyRef:
+              key: callbackURL
+              name: oidc
+        - name: OIDC_VALIDATOR_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              key: validatorClientID
+              name: oidc
+        - name: OIDC_VALIDATOR_ISSUER_URL
+          valueFrom:
+            secretKeyRef:
+              key: validatorIssuerURL
+              name: oidc
+        - name: SSL_CERT_FILE
+          value: /etc/headlamp-oidc/keycloak.crt
+        image: ghcr.io/headlamp-k8s/headlamp:v0.41.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: headlamp
+        ports:
+        - containerPort: 4466
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources: {}
+        securityContext:
+          privileged: false
+          runAsGroup: 101
+          runAsNonRoot: true
+          runAsUser: 100
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/headlamp/kubeconfig
+          name: kubeconfig
+        - mountPath: /etc/headlamp-oidc
+          name: oidc-ca
+      dnsPolicy: ClusterFirst
+      hostAliases:
+      - hostnames:
+        - keycloak.node-01
+        ip: 192.168.222.146
+      hostUsers: true
+      restartPolicy: Always
+      serviceAccount: headlamp
+      serviceAccountName: headlamp
+      volumes:
+      - name: kubeconfig
+        secret:
+          defaultMode: 420
+          secretName: headlamp-proxy-kubeconfig
+      - name: oidc-ca
+        secret:
+          defaultMode: 420
+          secretName: keycloak-crt
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/instance: headlamp
+    app.kubernetes.io/name: headlamp
+  name: headlamp
+  namespace: headlamp
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/instance: headlamp
+    app.kubernetes.io/name: headlamp
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: oidc
+  namespace: headlamp
+data:
+  callbackURL: aHR0cDovL2hlYWRsYW1wLm5vZGUtMDEvb2lkYy1jYWxsYmFjaw==
+  clientID: aGVhZGxhbXA=
+  clientSecret: UWlWNmxNYlBFQ1hlbjh5bmJCZm1FZ1lOWlNpNnhFYks=
+  issuerURL: aHR0cHM6Ly9rZXljbG9hay5ub2RlLTAxL3JlYWxtcy9oZWFkbGFtcA==
+  scopes: b3BlbmlkIHByb2ZpbGUgZW1haWwgb2ZmbGluZV9hY2Nlc3M=
+  validatorClientID: aGVhZGxhbXA=
+  validatorIssuerURL: aHR0cHM6Ly9rZXljbG9hay5ub2RlLTAxL3JlYWxtcy9oZWFkbGFtcA==
+type: Opaque

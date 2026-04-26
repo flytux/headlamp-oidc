@@ -1,8 +1,6 @@
-#!/usr/bin/env bash
-
 set -euo pipefail
 
-: "${KEYCLOAK_NS:=keycloak}"
+: "${KEYCLOAK_NS:=headlamp}"
 : "${REALM:=headlamp}"
 : "${ADMIN_GROUP:=hl-admins}"
 : "${DEV_GROUP:=hl-devs}"
