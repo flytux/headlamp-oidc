@@ -1,8 +1,8 @@
 # Keycloak + oauth2-proxy + Headlamp
 
-> **구성 선택지**
-> - **Phase 1** (섹션 1~10): oauth2-proxy로 UI 접근 보호 + 공용 SA 토큰으로 자동 로그인 (간단, 단일 권한)
-> - **Phase 2** (섹션 11~): kube-oidc-proxy 추가로 그룹별 RBAC 자동 적용 (kube-apiserver 설정 변경 불필요)
+> **구성 방식**
+> - **[1]** (1~10) : oauth2-proxy로 UI 접근 보호 + 공용 SA 토큰으로 자동 로그인 (간단, 단일 권한)
+> - **[2]** (11~)  : kube-oidc-proxy 추가로 그룹별 RBAC 자동 적용 (kube-apiserver 설정 변경 불필요)
 
 ## 1. 변수
 
@@ -704,10 +704,9 @@ echo http://${HEADLAMP_HOST}
 # headlamp-admins 멤버로 로그인 → cluster-admin 권한 (모든 리소스 보임)
 # headlamp-devs 멤버로 로그인 → view 권한 (읽기만 가능)
 
-<<<<<<< HEAD
+
 모두 정상 동작
-=======
+
 # kube-oidc-proxy 로그에서 그룹 확인
 kubectl -n ${HEADLAMP_NS} logs -l app=kube-oidc-proxy --tail=5 | grep AuSuccess
 ```
->>>>>>> b9d685f (headlamp-odic-keycloak  설정)
