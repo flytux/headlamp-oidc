@@ -389,6 +389,12 @@ kubectl create secret generic headlamp-proxy-kubeconfig --from-file=config=kube-
 
 ```jsx
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: headlamp
+  namespace: headlamp
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
