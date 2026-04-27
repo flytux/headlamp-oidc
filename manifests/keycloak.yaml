@@ -1,3 +1,8 @@
+# Keycloak Deployment, Service, and Ingress
+# 1) Check admin username & password
+# 2) Check ingressclass, hostname and TLS configuration 
+# 3) Generate private certificates for TLS from cert directory
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:

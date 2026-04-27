@@ -1,7 +1,3 @@
-### Prepare 3 Secrets
-### headlamp-proxy-kubeconfig : kubeconfig - kube-odic-proxy - with kube-odic-proxy-ca cert
-### oidc-ca : keycloak cert for oidc-ca
-### oidc : base64 endcoded oidc config values
 ---
 apiVersion: apps/v1
 kind: Deployment

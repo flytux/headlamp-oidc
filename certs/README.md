@@ -1,3 +1,10 @@
+#### Generate certs and secrets
+
+```
+# 1) Generate keycloak, kube-oidc-proxy, headlamp certs
+# 2) Generate keycloak CA secrets
+# 3) Generate kubeconfig for kube-oidc-proxy with Keycloak oidc client
+
 openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
   -keyout keycloak.key -out keycloak.crt -subj '/CN=keycloak.node-01' \
   -addext 'subjectAltName=DNS:keycloak.node-01,DNS:keycloak.headlamp'
@@ -21,5 +28,6 @@ kubectl create secret generic keycloak-crt --from-file=keycloak.crt=keycloak.crt
 
 
 # headlammp-proxy-kubeconfig 
-# replace cluster-ca cert with kube-oidc-proxy.crt
+# replace cluster-ca cert at kube-oidc-proxy-config file with kube-oidc-proxy.crt value
 kubectl create secret generic headlamp-proxy-kubeconfig --from-file=config=kube-oidc-proxy-config -n headlamp
+```
