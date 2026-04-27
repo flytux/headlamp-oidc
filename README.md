@@ -466,7 +466,7 @@ spec:
               key: validatorIssuerURL
               name: oidc
         - name: SSL_CERT_FILE
-          value: /etc/headlamp-oidc/keycloak.crt
+          value: /etc/headlamp-oidc/tls.crt
         image: ghcr.io/headlamp-k8s/headlamp:v0.41.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
@@ -522,7 +522,7 @@ spec:
       - name: oidc-ca
         secret:
           defaultMode: 420
-          secretName: keycloak-crt
+          secretName: keycloak-tls
 ---
 apiVersion: v1
 kind: Service
