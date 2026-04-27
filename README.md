@@ -352,7 +352,8 @@ subjects:
 ### **4. Headlamp 용 Kubeconfig 생성**
 
 ```jsx
-**# Kube-oidc-proxy 인증서 base64 encoding 값을 certificate-authority-data 값에 설정**
+# Kube-oidc-proxy 인증서 base64 encoding 값을 certificate-authority-data 값에 설정
+# Keycloak에서 생성한 headlamp client secret 설정
 ---
 apiVersion: v1
 kind: Config
