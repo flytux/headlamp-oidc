@@ -5,14 +5,16 @@ Created: April 28, 2026 8:08 AM
 Last Edited Time: April 28, 2026 8:09 AM
 Last Edited By: Jaehoon Jung
 
-💡kube-oidc-proxy와 외부 oidc IDP를 이용하여 headlamp의 클러스터 접근 권한 제어 설정
+### kube-oidc-proxy와 외부 oidc IDP를 이용하여 headlamp의 클러스터 접근 권한 제어 설정
 
+---
 - 외부 IDP로 Keycloak 이용
 - kube-odic-proxy 이용 API-server 역할 수행 (**Impersonate 권한 부여**)
 - Headlamp kubeconfig를 kube-oidc-proxy를 대상으로 구성
 - oidc 서버 제공 Group 값에 따라 k8s cluster-admin과 view 역할 부여
 - Group : hl-admins > cluster-admin
 - Group : hl-devs > view
+---
 
 ### 1. Keycloak, Kube-oidc-proxy, headlamp 용 인증서 생성
 
