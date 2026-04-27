@@ -292,23 +292,23 @@ spec:
         - --oidc-client-id=headlamp
         - --oidc-username-claim=preferred_username
         - --oidc-groups-claim=groups
-        - --oidc-ca-file=/etc/oidc/keycloak.crt
+        - --oidc-ca-file=/etc/oidc/tls.crt
         ports:
         - containerPort: 8443
         volumeMounts:
         - name: tls
           mountPath: /etc/tls
           readOnly: true
-        - name: keycloak-crt
+        - name: keycloak-tls
           mountPath: /etc/oidc
           readOnly: true
       volumes:
       - name: tls
         secret:
           secretName: kube-oidc-proxy-tls
-      - name: keycloak-crt
+      - name: keycloak-tls
         secret:
-          secretName: keycloak-crt
+          secretName: keycloak-tls
 ---
 apiVersion: v1
 kind: Service
