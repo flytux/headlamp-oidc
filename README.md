@@ -382,7 +382,7 @@ users:
 ---
 **# 위 config 파일로 시크릿 생성
 
-kubectl create secret generic headlamp-proxy-kubeconfig --from-file=config=kube-oidc-proxy-config -n headlamp**
+kubectl create secret generic headlamp-proxy-kubeconfig --from-file=config=kube-oidc-proxy-config -n headlamp
 ```
 
 ### **5. Headlamp 설치**
