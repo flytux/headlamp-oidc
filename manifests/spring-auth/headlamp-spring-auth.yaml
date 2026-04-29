@@ -1,0 +1,34 @@
+# JSON6902 Patch: headlamp Deployment - spring-auth 전용 변경사항만 기술
+- op: add
+  path: /spec/template/spec/hostAliases
+  value:
+  - ip: "192.168.100.101"
+    hostnames:
+    - "spring-auth.node-01"
+- op: replace
+  path: /spec/template/spec/containers/0/env/0/valueFrom/secretKeyRef/name
+  value: oidc-spring-auth
+- op: replace
+  path: /spec/template/spec/containers/0/env/1/valueFrom/secretKeyRef/name
+  value: oidc-spring-auth
+- op: replace
+  path: /spec/template/spec/containers/0/env/2/valueFrom/secretKeyRef/name
+  value: oidc-spring-auth
+- op: replace
+  path: /spec/template/spec/containers/0/env/3/valueFrom/secretKeyRef/name
+  value: oidc-spring-auth
+- op: replace
+  path: /spec/template/spec/containers/0/env/4/valueFrom/secretKeyRef/name
+  value: oidc-spring-auth
+- op: replace
+  path: /spec/template/spec/containers/0/env/5/valueFrom/secretKeyRef/name
+  value: oidc-spring-auth
+- op: replace
+  path: /spec/template/spec/containers/0/env/6/valueFrom/secretKeyRef/name
+  value: oidc-spring-auth
+- op: replace
+  path: /spec/template/spec/containers/0/env/7/value
+  value: /etc/headlamp-oidc/tls.crt
+- op: replace
+  path: /spec/template/spec/volumes/1/secret/secretName
+  value: spring-auth-tls

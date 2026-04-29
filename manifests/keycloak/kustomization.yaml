@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: headlamp
+resources:
+  - ../base
+  - keycloak-deploy.yaml
+  - keycloak-service.yaml
+  - keycloak-ingress.yaml
+  - headlamp-oidc-secret.yaml
+  - headlamp-proxy-kubeconfig.yaml
+patches:
+  - path: kube-oidc-proxy-keycloak.yaml

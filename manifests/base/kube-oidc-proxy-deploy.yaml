@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-oidc-proxy
+  namespace: headlamp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kube-oidc-proxy
+  template:
+    metadata:
+      labels:
+        app: kube-oidc-proxy
+    spec:
+      serviceAccountName: kube-oidc-proxy
+      containers:
+      - name: kube-oidc-proxy
+        image: ghcr.io/tremolosecurity/kube-oidc-proxy:1.0.11
+        command:
+        - /usr/bin/kube-oidc-proxy
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: tls
+          mountPath: /etc/tls
+          readOnly: true
+        - name: keycloak-tls
+          mountPath: /etc/oidc
+          readOnly: true
+      volumes:
+      - name: tls
+        secret:
+          secretName: kube-oidc-proxy-tls
+      - name: keycloak-tls
+        secret:
+          secretName: keycloak-tls
+

@@ -1,0 +1,24 @@
+# Strategic Merge Patch: kube-oidc-proxy Deployment - keycloak 전용 변경사항
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-oidc-proxy
+  namespace: headlamp
+spec:
+  template:
+    spec:
+      hostAliases:
+      - ip: "192.168.100.101"
+        hostnames:
+        - "keycloak.node-01"
+      containers:
+      - name: kube-oidc-proxy
+        args:
+        - --secure-port=8443
+        - --tls-cert-file=/etc/tls/tls.crt
+        - --tls-private-key-file=/etc/tls/tls.key
+        - --oidc-issuer-url=https://keycloak.node-01/realms/headlamp
+        - --oidc-client-id=headlamp
+        - --oidc-username-claim=preferred_username
+        - --oidc-groups-claim=groups
+        - --oidc-ca-file=/etc/oidc/tls.crt

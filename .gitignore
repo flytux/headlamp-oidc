@@ -1,2 +1,11 @@
 *.key
 *.crt
+# Maven 빌드 결과물
+target/
+*.class
+*.jar
+*.war
+*.ear
+# 로그 및 임시 파일
+*.log
+.mvn/

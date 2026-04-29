@@ -1,0 +1,25 @@
+server:
+  port: 9000
+  forward-headers-strategy: framework
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    root: INFO
+    com.example.authserver: INFO
+    org.springframework.security: TRACE
+    org.springframework.security.oauth2.server.authorization: TRACE
+
+auth:
+  issuer: ${AUTH_ISSUER:https://spring-auth.node-01}
+  client-id: ${AUTH_CLIENT_ID:headlamp}
+  client-secret: ${AUTH_CLIENT_SECRET:change-me-with-real-client-secret}
+  redirect-uri: ${AUTH_REDIRECT_URI:http://headlamp.node-01/oidc-callback}
+
+bootstrap:
+  admin-token: ${BOOTSTRAP_ADMIN_TOKEN:change-me-bootstrap-token}

@@ -10,8 +10,58 @@ set -euo pipefail
 : "${DEV_PASSWORD:=password}"
 : "${CLIENT_ID:=headlamp}"
 : "${HEADLAMP_URL:=http://headlamp.node-01}"
+: "${SYNC_CLIENT_SECRET_FILES:=true}"
+
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd -- "${SCRIPT_DIR}/../../.." && pwd)
+
+: "${HEADLAMP_OIDC_SECRET_FILE:=${REPO_ROOT}/manifests/keycloak/headlamp-oidc-secret.yaml}"
+: "${KUBE_OIDC_PROXY_CONFIG_FILE:=${REPO_ROOT}/manifests/keycloak/headlamp-proxy-kubeconfig.yaml}"
 
 KEYCLOAK_POD=$(kubectl -n "${KEYCLOAK_NS}" get pod -l app=keycloak -o jsonpath='{.items[0].metadata.name}')
+
+escape_sed_replacement() {
+  printf '%s' "$1" | sed -e 's/[\/&|\\]/\\&/g'
+}
+
+extract_client_secret() {
+  printf '%s\n' "$1" | sed -n 's/.*"value"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'
+}
+
+replace_key_value() {
+  local file="$1"
+  local key="$2"
+  local value="$3"
+  local escaped_value
+
+  if [[ ! -f "${file}" ]]; then
+    echo "Missing file: ${file}" >&2
+    return 1
+  fi
+
+  if ! grep -qE "^[[:space:]]*${key}:" "${file}"; then
+    echo "Key ${key} not found in ${file}" >&2
+    return 1
+  fi
+
+  escaped_value=$(escape_sed_replacement "${value}")
+  sed -i -E "s|^([[:space:]]*${key}:[[:space:]]*).*$|\1${escaped_value}|" "${file}"
+}
+
+sync_client_secret_files() {
+  local client_secret="$1"
+
+  replace_key_value "${HEADLAMP_OIDC_SECRET_FILE}" "clientSecret" "${client_secret}"
+  replace_key_value "${KUBE_OIDC_PROXY_CONFIG_FILE}" "client-secret" "${client_secret}"
+
+  kubectl  -n "${KEYCLOAK_NS}" delete secret -l idp=keycloak
+
+  kubectl apply -f "${HEADLAMP_OIDC_SECRET_FILE}"
+  kubectl apply -f "${KUBE_OIDC_PROXY_CONFIG_FILE}"
+
+  echo "Synced client secret to ${HEADLAMP_OIDC_SECRET_FILE}" >&2
+  echo "Synced client secret to ${KUBE_OIDC_PROXY_CONFIG_FILE}" >&2
+}
 
 kubectl -n "${KEYCLOAK_NS}" exec "${KEYCLOAK_POD}" -- /opt/keycloak/bin/kcadm.sh config credentials \
   --server http://127.0.0.1:8080 \
@@ -84,4 +134,17 @@ kubectl -n "${KEYCLOAK_NS}" exec "${KEYCLOAK_POD}" -- /opt/keycloak/bin/kcadm.sh
   -s 'config."userinfo.token.claim"=true' \
   -s 'config."claim.name"=groups' || true
 
-kubectl -n "${KEYCLOAK_NS}" exec "${KEYCLOAK_POD}" -- /opt/keycloak/bin/kcadm.sh get clients/"${CLIENT_UUID}"/client-secret -r "${REALM}"
+CLIENT_SECRET_JSON=$(kubectl -n "${KEYCLOAK_NS}" exec "${KEYCLOAK_POD}" -- /opt/keycloak/bin/kcadm.sh get clients/"${CLIENT_UUID}"/client-secret -r "${REALM}")
+CLIENT_SECRET=$(extract_client_secret "${CLIENT_SECRET_JSON}")
+
+printf '%s\n' "${CLIENT_SECRET_JSON}"
+
+if [[ -z "${CLIENT_SECRET}" ]]; then
+  echo "Failed to parse Keycloak client secret" >&2
+  exit 1
+fi
+
+if [[ "${SYNC_CLIENT_SECRET_FILES}" == "true" ]]; then
+  sync_client_secret_files "${CLIENT_SECRET}"
+fi
+

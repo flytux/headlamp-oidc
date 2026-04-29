@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -70,7 +69,7 @@ spec:
               key: validatorIssuerURL
               name: oidc
         - name: SSL_CERT_FILE
-          value: /etc/headlamp-oidc/keycloak.crt
+          value: /etc/headlamp-oidc/tls.crt
         image: ghcr.io/headlamp-k8s/headlamp:v0.41.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
@@ -113,7 +112,7 @@ spec:
       hostAliases:
       - hostnames:
         - keycloak.node-01
-        ip: 192.168.222.146
+        ip: 192.168.100.101
       hostUsers: true
       restartPolicy: Always
       serviceAccount: headlamp
@@ -126,39 +125,4 @@ spec:
       - name: oidc-ca
         secret:
           defaultMode: 420
-          secretName: keycloak-crt
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app.kubernetes.io/instance: headlamp
-    app.kubernetes.io/name: headlamp
-  name: headlamp
-  namespace: headlamp
-spec:
-  ports:
-  - name: http
-    port: 80
-    protocol: TCP
-    targetPort: http
-  selector:
-    app.kubernetes.io/instance: headlamp
-    app.kubernetes.io/name: headlamp
-  sessionAffinity: None
-  type: ClusterIP
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: oidc
-  namespace: headlamp
-data:
-  callbackURL: aHR0cDovL2hlYWRsYW1wLm5vZGUtMDEvb2lkYy1jYWxsYmFjaw==
-  clientID: aGVhZGxhbXA=
-  clientSecret: UWlWNmxNYlBFQ1hlbjh5bmJCZm1FZ1lOWlNpNnhFYks=
-  issuerURL: aHR0cHM6Ly9rZXljbG9hay5ub2RlLTAxL3JlYWxtcy9oZWFkbGFtcA==
-  scopes: b3BlbmlkIHByb2ZpbGUgZW1haWwgb2ZmbGluZV9hY2Nlc3M=
-  validatorClientID: aGVhZGxhbXA=
-  validatorIssuerURL: aHR0cHM6Ly9rZXljbG9hay5ub2RlLTAxL3JlYWxtcy9oZWFkbGFtcA==
-type: Opaque
+          secretName: keycloak-tls

@@ -16,6 +16,52 @@ Last Edited By: Jaehoon Jung
 - Group : hl-devs > view
 ---
 
+### Spring Authorization Server 전환 (기존 Keycloak 구성과 분리 관리)
+
+- 기존 Keycloak 대상 파일은 유지하고, Spring 대상 파일을 별도로 추가함
+- Spring 대상 파일
+  - manifests/spring-authorization-server.yaml
+  - manifests/kube-oidc-proxy-spring-auth.yaml
+  - manifests/headlamp-spring-auth.yaml
+- 분리 적용 커맨드
+
+```bash
+kubectl apply -k manifests/spring-auth
+```
+
+- 이미지 빌드
+
+```bash
+docker build -t spring-auth-server:0.1.0 ./spring-auth-server
+```
+
+- 서버 기동 후 OIDC 클라이언트/사용자/그룹 등록
+
+```bash
+BOOTSTRAP_ADMIN_TOKEN=change-me-bootstrap-token \
+CLIENT_SECRET=<real-client-secret> \
+./manifests/spring-auth/scripts/spring-auth-bootstrap.sh
+```
+
+- 스크립트는 요청 URL, 전송 payload, HTTP 상태, 응답 본문을 출력함
+- 기본값은 secret/password/token 마스킹이며, 실제 값까지 보려면 `SHOW_BOOTSTRAP_SECRETS=true` 로 실행
+
+- 로컬 클러스터 사용 시 이미지 로드 예시
+
+```bash
+# kind
+kind load docker-image spring-auth-server:0.1.0
+
+# minikube
+minikube image load spring-auth-server:0.1.0
+```
+
+- 참고
+  - manifests/headlamp-spring-auth.yaml 의 oidc-spring-auth 시크릿에서 clientSecret 값을 실제 값으로 변경 필요
+  - oidc-spring-auth 시크릿의 scopes 값은 Headlamp 형식에 맞춰 `profile,email,groups` 처럼 콤마(,)로 지정하고 `openid` 는 넣지 않음
+  - spring-auth 서버는 `BOOTSTRAP_ADMIN_TOKEN` 값과 함께 `/bootstrap/registrations` API로 클라이언트/사용자를 등록함
+  - spring-auth 인증서 시크릿(spring-auth-crt, spring-auth-tls)을 사전에 생성 필요
+
 ### 1. Keycloak, Kube-oidc-proxy, headlamp 용 인증서 생성
 
 ```jsx
@@ -39,6 +85,17 @@ kubectl create secret tls headlamp-tls --key headlamp.key --cert headlamp.crt -n
 ```
 
 ### 2. Keycloak 설치, Realm, 사용자, 클라이언트 생성
+
+```bash
+kubectl apply -k manifests/keycloak
+./manifests/keycloak/scripts/keycloak-bootstrap.sh
+```
+
+- `keycloak-bootstrap.sh` 는 생성된 client secret를 아래 파일에 자동 반영함
+  - `certs/kube-oidc-proxy-config`
+  - `manifests/keycloak/headlamp-oidc-secret.yaml`
+  - `manifests/base/headlamp-secret.yaml`
+- 동기화를 끄려면 `SYNC_CLIENT_SECRET_FILES=false ./manifests/keycloak/scripts/keycloak-bootstrap.sh`
 
 ```jsx
 # Keycloak deploy YAML
@@ -377,10 +434,12 @@ users:
           client-id: headlamp
           client-secret: 15IyYr8lTu6Rym3HELGcOK8dhqcCRhjl
           idp-issuer-url: https://keycloak.node-01/realms/headlamp
-          scopes: openid profile email
+          scope: profile,email
           useAccessToken: "true"
 ---
-**# 위 config 파일로 시크릿 생성
+**# 위 config 파일로 시크릿 생성**
+
+- `./manifests/keycloak/scripts/keycloak-bootstrap.sh` 실행 후 `kube-oidc-proxy-config` 의 `client-secret` 값이 자동 갱신됨
 
 kubectl create secret generic headlamp-proxy-kubeconfig --from-file=config=kube-oidc-proxy-config -n headlamp
 ```

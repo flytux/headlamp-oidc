@@ -1,0 +1,54 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-auth-server
+  namespace: headlamp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-auth-server
+  template:
+    metadata:
+      labels:
+        app: spring-auth-server
+    spec:
+      containers:
+      - name: spring-auth-server
+        image: spring-auth:v2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9000
+          name: http
+        env:
+        - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+          value: file:/opt/spring/config/
+        - name: BOOTSTRAP_ADMIN_TOKEN
+          value: change-me-bootstrap-token
+        - name: JAVA_TOOL_OPTIONS
+          value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75"
+        volumeMounts:
+        - name: spring-auth-config
+          mountPath: /opt/spring/config
+          readOnly: true
+        readinessProbe:
+          tcpSocket:
+            port: 9000
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 9000
+          initialDelaySeconds: 40
+          periodSeconds: 15
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            memory: 1024Mi
+      volumes:
+      - name: spring-auth-config
+        configMap:
+          name: spring-auth-server-config

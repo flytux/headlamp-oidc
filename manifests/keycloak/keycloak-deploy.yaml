@@ -53,39 +53,4 @@ spec:
             memory: 768Mi
           limits:
             memory: 1536Mi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: keycloak
-spec:
-  selector:
-    app: keycloak
-  ports:
-  - name: http
-    port: 80
-    targetPort: 8080
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: keycloak
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-spec:
-  ingressClassName: nginx
-  tls:
-  - hosts:
-    - keycloak.node-01
-    secretName: keycloak-tls
-  rules:
-  - host: keycloak.node-01
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: keycloak
-            port:
-              number: 80
+

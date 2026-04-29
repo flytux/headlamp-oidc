@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spring-auth-server-config
+  namespace: headlamp
+data:
+  application.yaml: |
+    server:
+      port: 9000
+      forward-headers-strategy: framework
+    logging:
+      level:
+        root: INFO
+        org.springframework.security: TRACE
+        org.springframework.security.oauth2.server.authorization: TRACE
+        org.springframework.security.web.FilterChainProxy: TRACE
+        org.springframework.security.authentication: TRACE
+        org.springframework.web: INFO
+    spring:
+      application:
+        name: spring-authorization-server

@@ -1,0 +1,23 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: spring-auth-server
+  namespace: headlamp
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - spring-auth.node-01
+    secretName: spring-auth-tls
+  rules:
+  - host: spring-auth.node-01
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: spring-auth-server
+            port:
+              number: 80
